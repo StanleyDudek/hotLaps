@@ -633,7 +633,7 @@ end
 local function drawHotLaps(dt)
     gui.setupWindow("hotLaps")
     pushStyle()
-    im.Begin("hotLaps " .. hotLaps_VERSION .. " | " .. levelIdentifier)
+    im.Begin("hotLaps " .. hotLaps_VERSION .. " | " .. levelIdentifier .. " | " .. trackIdentifier)
         im.BeginChild1("Info Area", im.ImVec2(0, 90), true)
             if trackData.overallBestTime then
                 if trackData.overallBestTime.lapTime then
