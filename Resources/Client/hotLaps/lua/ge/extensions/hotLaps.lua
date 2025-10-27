@@ -566,7 +566,7 @@ local function rxGain(data)
         time = prettySeconds(splitData.time)
     end
     guihooks.trigger('toastrMsg', {type="success", title = "-" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")", config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{"-" .. prettyDifference, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_CountdownGo')", false}})
+    guihooks.trigger('ScenarioFlashMessage', {{"-" .. prettyDifference, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_Checkpoint')", false}})
 end
 
 local function rxLoss(data)
@@ -584,7 +584,7 @@ local function rxLoss(data)
         time = prettySeconds(splitData.time)
     end
     guihooks.trigger('toastrMsg', {type="error", title = "+" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")", config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{"+" .. prettyDifference, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_CountdownGo')", false}})
+    guihooks.trigger('ScenarioFlashMessage', {{"+" .. prettyDifference, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_Checkpoint')", false}})
 end
 
 local function rxNeutral(data)
@@ -596,7 +596,7 @@ local function rxNeutral(data)
         time = prettySeconds(splitData.time)
     end
     guihooks.trigger('toastrMsg', {type="warning", title = time , msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")", config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{time, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_CountdownGo')", false}})
+    guihooks.trigger('ScenarioFlashMessage', {{time, 5, "Engine.Audio.playOnce('AudioGui', 'event:UI_Checkpoint')", false}})
 end
 
 local function pushStyle()
