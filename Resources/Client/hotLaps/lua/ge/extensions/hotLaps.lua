@@ -69,6 +69,8 @@ local vehiclesLookup = {
 
 local sortedVehicles = {}
 
+local chronLeaders = {}
+
 local checkpointCount = 0
 
 local penaltyCount = 0
@@ -1767,6 +1769,154 @@ local checkPointsData = {
     }
 }
 
+local markers = {}
+local markersData = {
+    {
+        name = "startStopMarker",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            -402.754089,244.808746,24.9899998
+        },
+        color = {
+            1,0,0,0.5
+        },
+        rot = {
+            0.846121609,0.53298986,0,-0.53298986,0.846121609,0,0,0,1
+        },
+        scale = {
+            6,1,6
+        }
+    },
+    {
+        name = "lapSplitMarker1",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            -158.96373,123.630775,25.0849991
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.430999994,-0.90200001,0,0.90200001,0.430999994,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker2",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            60.8591042,258.479156,28.7709999
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.027320087,-0.999626696,0,0.999626696,0.027320087,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker3",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            388.275726,-136.891632,35.3390007
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.892663538,-0.450723618,0,0.450723618,0.892663538,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker4",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            303.266998,-468.355011,39.2659988
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.580790758,-0.814052999,0,0.814052999,0.580790758,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker5",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            26.7258854,-144.981171,25.4860001
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.947673798,0.319240302,0,-0.319240302,0.947673798,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker6",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            -155.495255,257.525665,31.0869999
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.945201695,-0.326486975,0,0.326486975,0.945201695,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker7",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            -354.82016,432.074066,30.6819992
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.189701498,0.981841743,0,-0.981841743,0.189701498,0,0,0,1
+        },
+        scale = {
+            5,1,5
+        }
+    },
+    {
+        name = "lapSplitMarker8",
+        shape = "shapes/interface/ringMarker/checkpoint_ring_finish",
+        pos = {
+            -498.186768,397.248138,25.1340008
+        },
+        color = {
+            1,1,0,0.5
+        },
+        rot = {
+            0.898856461,0.438243121,0,-0.438243121,0.898856461,0,0,0,1
+        },
+        scale = {
+            5.5,1,5.5
+        }
+    }
+}
+
 local function tableLength(table)
     local counter = 0
     for _ in pairs(table) do
@@ -1856,27 +2006,64 @@ local function rxLeaderBoard(data)
         theLeaderBoard.levels[levelIdentifier].tracks[trackIdentifier][recievedData.model] = {
             entries = recievedData.data.entries,
             overallBestTime = recievedData.data.overallBestTime
-            }
+        }
+        local skip
+        local chronLength = tableLength(chronLeaders)
+        if recievedData.data.overallBestTime.owner then
+            if chronLength > 0 then
+                for k in pairs(chronLeaders) do
+                    if chronLeaders[k].owner == recievedData.data.overallBestTime.owner then
+                        if chronLeaders[k].lapTime == recievedData.data.overallBestTime.lapTime then
+                            skip = true
+                        end
+                    end
+                end
+                if not skip then
+                    table.insert(chronLeaders, recievedData.data.overallBestTime)
+                    table.sort(
+                        chronLeaders, function(a, b)
+                            if a.lapTime == b.lapTime then
+                                return a.lapTime > b.lapTime
+                            else
+                                return a.lapTime < b.lapTime
+                            end
+                        end
+                    )
+                end
+                skip = false
+            else
+                table.insert(chronLeaders, recievedData.data.overallBestTime)
+                table.sort(
+                    chronLeaders, function(a, b)
+                        if a.lapTime == b.lapTime then
+                            return a.lapTime > b.lapTime
+                        else
+                            return a.lapTime < b.lapTime
+                        end
+                    end
+                )
+            end
+        end
     end
 end
 
 local function rxCourseBest(time)
-    guihooks.trigger('toastrMsg', {type="success", title = "New Best Course Time!!!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 }})
-    guihooks.trigger('ScenarioFlashMessage', {{"New Best: " .. prettyTime(time), 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="success", title = "Course Best!!!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 }})
+    guihooks.trigger('ScenarioFlashMessage', {{"Course Best: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Tier', {volume = 6, unique = true})
     penaltyCount = 0
 end
 
 local function rxPersonalBest(time)
-    guihooks.trigger('toastrMsg', {type="warning", title = "New Best Time!!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 }})
-    guihooks.trigger('ScenarioFlashMessage', {{"New Personal Best: " .. prettyTime(time), 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="warning", title = "Personal Best!!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 }})
+    guihooks.trigger('ScenarioFlashMessage', {{"Personal Best: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Tier', {volume = 3, unique = true})
     penaltyCount = 0
 end
 
 local function rxCurentLap(time)
-    guihooks.trigger('toastrMsg', {type="info", title = "Try again!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 }})
-    guihooks.trigger('ScenarioFlashMessage', {{prettyTime(time), 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="info", title = "Try again!", msg = "Your Lap Time was: " .. prettyTime(time) .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 }})
+    guihooks.trigger('ScenarioFlashMessage', {{prettyTime(time) .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Tier', {volume = 1, unique = true})
     penaltyCount = 0
 end
@@ -1895,8 +2082,8 @@ local function rxGain(data)
     else
         time = prettySeconds(splitData.time)
     end
-    guihooks.trigger('toastrMsg', {type="success", title = "-" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{"-" .. prettyDifference .. " || " .. time, 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="success", title = "-" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 } })
+    guihooks.trigger('ScenarioFlashMessage', {{"-" .. prettyDifference .. " || " .. time .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', "event:UI_CountdownGo", {volume = 2, unique = true})
 end
 
@@ -1914,8 +2101,8 @@ local function rxLoss(data)
     else
         time = prettySeconds(splitData.time)
     end
-    guihooks.trigger('toastrMsg', {type="error", title = "+" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{"+" .. prettyDifference .. " || " .. time, 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="error", title = "+" .. prettyDifference .. " || " .. time, msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 } })
+    guihooks.trigger('ScenarioFlashMessage', {{"+" .. prettyDifference .. " || " .. time .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', "event:UI_Countdown1", {volume = 2, unique = true})
 end
 
@@ -1927,8 +2114,8 @@ local function rxNeutral(data)
     else
         time = prettySeconds(splitData.time)
     end
-    guihooks.trigger('toastrMsg', {type="warning", title = time , msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 5000 } })
-    guihooks.trigger('ScenarioFlashMessage', {{time, 5, nil, false}})
+    guihooks.trigger('toastrMsg', {type="warning", title = time , msg = splitData.triggerName .. " (" .. splitData.splitTimeID .. "/" .. splitData.checkpointCount .. ")" .. "<br>Penalties: " .. penaltyCount, config = {timeOut = 3000 } })
+    guihooks.trigger('ScenarioFlashMessage', {{time .. "<br>Penalties: " .. penaltyCount, 3, nil, false}})
     Engine.Audio.playOnce('AudioGui', 'event:UI_Checkpoint', {volume = 2, unique = true})
 end
 
@@ -2236,6 +2423,29 @@ local function drawHotLaps()
                 im.EndChild()
                 im.EndTabItem()
             end
+            if im.BeginTabItem("Chronological") then
+                im.BeginChild1("Chronological Tab", im.ImVec2(0, 0), true)
+                for i = 1, tableLength(chronLeaders) do
+                    local position
+                    if chronLeaders[i].owner then
+                        if i < 10 then
+                            position = "00" .. i
+                        elseif i < 100 then
+                            position = "0" .. i
+                        end
+                        if im.TreeNode1(position .. " | " .. prettyTime(chronLeaders[i].lapTime) .. " ( " .. chronLeaders[i].penalties .. "p ) | " .. chronLeaders[i].owner) then
+                            im.Indent()
+                            im.Indent()
+                            im.Text(chronLeaders[i].name .. " - " .. chronLeaders[i].config)
+                            im.Unindent()
+                            im.Unindent()
+                            im.TreePop()
+                        end
+                    end
+                end
+                im.EndChild()
+                im.EndTabItem()
+            end
             im.EndTabBar()
         end
         im.PopStyleColor(22)
@@ -2260,6 +2470,31 @@ local function createCheckPoint(data)
     return checkPoint
 end
 
+local function createMarker(data)
+    local marker =  createObject('TSStatic')
+    marker:setField('shapeName', 0, "art/" .. data.shape .. ".dae")
+    marker.useInstanceRenderData = true
+    marker:setField('instanceColor', 0, data.color[1] .. " " .. data.color[2] .. " " .. data.color[3] .. " " .. data.color[4])
+    marker:setField('collisionType', 0, "Collision Mesh")
+    marker:setField('decalType', 0, "Collision Mesh")
+    marker:setField('playAmbient', 0, "1")
+    marker:setField('allowPlayerStep', 0, "1")
+    marker:setField('canSave', 0, "0")
+    marker:setField('canSaveDynamicFields', 0, "1")
+    marker:setField('renderNormals', 0, "0")
+    marker:setField('meshCulling', 0, "0")
+    marker:setField('originSort', 0, "0")
+    marker:setField('forceDetail', 0, "-1")
+    if data.rot then
+        marker:setField('rotationMatrix', 0, data.rot[1] .. " " .. data.rot[2] .. " " .. data.rot[3] .. " " .. data.rot[4] .. " " .. data.rot[5] .. " " .. data.rot[6] .. " " .. data.rot[7] .. " " .. data.rot[8] .. " " .. data.rot[9])
+    end
+    marker:registerObject(data.name)
+    marker:setPosition(vec3(data.pos[1],data.pos[2],data.pos[3]))
+    marker:setScale(vec3(data.scale[1], data.scale[2], data.scale[3]))
+    marker.canSave = false
+    return marker
+end
+
 local function onLapStart(genericName)
     lapTimer = 0
     lapStart = lapTimer
@@ -2275,9 +2510,11 @@ local function onLapStart(genericName)
         if overallBestTime then
             if overallBestTime.lapTime then
                 guihooks.trigger('toastrMsg', {type = "info", title = "Hotlap Started!", msg = "Fastest " .. overallBestTime.name .. ": " .. prettyTime(overallBestTime.lapTime) .. "<br>Penalties: " .. overallBestTime.penalties  .. "<br>" .. overallBestTime.owner, config = {timeOut = 2500 }})
+                guihooks.trigger('ScenarioFlashMessage', {{"Fastest " .. overallBestTime.name .. ": " .. prettyTime(overallBestTime.lapTime) .. "<br>Penalties: " .. overallBestTime.penalties  .. "<br>" .. overallBestTime.owner, 2.5, nil, false}})
                 Engine.Audio.playOnce('AudioGui', "event:>UI>Career>Drift_PointsReceived", {volume = 2, unique = true})
             else
                 guihooks.trigger('toastrMsg', {type = "info", title = "Hotlap Started!", msg = "No laptimes for this model!<br>Be the first!", config = {timeOut = 2500 }})
+                guihooks.trigger('ScenarioFlashMessage', {{"No laptimes for this model!<br>Be the first!", 2.5, nil, false}})
                 Engine.Audio.playOnce('AudioGui', "event:>UI>Career>Drift_PointsReceived", {volume = 2, unique = true})
             end
         end
@@ -2320,6 +2557,7 @@ local function onLapStop(gameVehicleID)
         else
             verifySplits = {}
             guihooks.trigger('toastrMsg', {type = "error", title = "Hotlap Restarted!", msg = "Pass through all checkpoints to log a time!", config = {timeOut = 2500 }})
+            guihooks.trigger('ScenarioFlashMessage', {{"Hotlap Restarted!<br>Pass through all checkpoints to log a time!", 2.5, nil, false}})
             Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Canceled', {volume = 2, unique = true})
             lapsActive = false
         end
@@ -2332,8 +2570,8 @@ local function onLapOutOfBounds(outbound)
             if not out then
                 out = true
                 penaltyCount = penaltyCount + 1
-                guihooks.trigger('toastrMsg', {type = "error", title = "Track Limits Penalty!", msg = "Penalties: " .. penaltyCount, config = {timeOut = 5000 }})
-                guihooks.trigger('ScenarioFlashMessage', {{"Penalty!", 3, nil, false}})
+                guihooks.trigger('toastrMsg', {type = "error", title = "Track Limits Penalty!", msg = "Penalties: " .. penaltyCount, config = {timeOut = 3000 }})
+                guihooks.trigger('ScenarioFlashMessage', {{"Track Limits Penalty!<br>Penalties: " .. penaltyCount, 3, nil, false}})
                 Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Canceled', {pitch=0.5, volume = 2, unique = true})
             end
         end
@@ -2347,7 +2585,8 @@ local function onVehicleResetted(gameVehicleID)
             lapsActive = false
             lapsContinue = false
             penaltyCount = 0
-            guihooks.trigger('toastrMsg', {type = "error", title = "Time Forfeit!", msg = "Lap voided due to reset.", config = {timeOut = 2500 }})
+            guihooks.trigger('toastrMsg', {type = "error", title = "Time Forfeit!", msg = "Lap voided due to reset!", config = {timeOut = 2500 }})
+            guihooks.trigger('ScenarioFlashMessage', {{"Time Forfeit!<br>Lap voided due to reset!", 2.5, nil, false}})
             Engine.Audio.playOnce('AudioGui', 'event:>UI>Career>Drift_Canceled', {volume = 2, unique = true})
         end
     end
@@ -2413,12 +2652,24 @@ local function onUpdate(dt)
                 for _, data in pairs(checkPointsData.levels[levelIdentifier].tracks[trackIdentifier].checkPoints) do
                     local newCheckPoint = scenetree.findObject(data.name)
                     if newCheckPoint == nil then
-                        log('I', "markerCreation", 'Creating marker ' .. tostring(data.name) )
+                        log('I', "markerCreation", 'Creating checkpoint ' .. tostring(data.name) )
                         newCheckPoint = createCheckPoint(data)
                     end
                     table.insert(checkPoints, newCheckPoint)
                 end
                 checkpointCount = tempCount
+            end
+        end
+        if #markers == 0 then
+            if levelIdentifier then
+                for _, data in pairs(markersData) do
+                    local newCheckPointMarker = scenetree.findObject(data.name)
+                    if newCheckPointMarker == nil then
+                        log('I', "checkPointCreation", 'Creating marker ' .. tostring(data.name) )
+                        newCheckPointMarker = createMarker(data)
+                    end
+                    table.insert(markers, newCheckPointMarker)
+                end
             end
         end
         if levelIdentifier then
@@ -2440,6 +2691,7 @@ local function onExtensionLoaded()
             end
         end
     )
+
     AddEventHandler("rxCourseBest", rxCourseBest)
     AddEventHandler("rxPersonalBest", rxPersonalBest)
     AddEventHandler("rxCurentLap", rxCurentLap)
