@@ -1998,6 +1998,7 @@ end
 local function rxPrefabSync(data)
     processPrefab(prefabIdentifier, levelIdentifier .. "-" .. trackIdentifier)
     be:reloadCollision()
+    be:setDynamicCollisionEnabled(false)
 end
 
 local function rxLeaderBoard(data)
@@ -2691,7 +2692,6 @@ local function onExtensionLoaded()
     AddEventHandler("rxNeutral", rxNeutral)
     AddEventHandler("rxLeaderBoard", rxLeaderBoard)
     AddEventHandler("rxPrefabSync", rxPrefabSync)
-
     local currentMPUILayout = deepcopy(originalMPUILayout)
     local found
     if currentMPUILayout then
@@ -2718,7 +2718,6 @@ local function onExtensionLoaded()
             jsonWriteFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json", currentMPUILayout, 1)
         end
     end
-
     gui_module.initialize(gui)
     gui.registerWindow("hotLaps", im.ImVec2(300, 500))
     gui.showWindow("hotLaps")
