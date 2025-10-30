@@ -1938,7 +1938,7 @@ function Vehicle:addLapTime(data, beammp)
         lapTypeOutput = "rxPersonalBest"
         lapTimeOutput = tostring(self.bestTime)
         MP.SendChatMessage(-1, self.owner .. " set a personal best time of " .. prettyTime(self.bestTime))
-        MP.SendNotification(-1, self.owner .. " set a personal best time of " .. prettyTime(self.bestTime), 'timer', self.owner .. tostring(os.time))
+        MP.SendNotification(-1, self.owner .. " set a personal best time of " .. prettyTime(self.bestTime))
     else
         lapTypeOutput = "rxCurentLap"
         lapTimeOutput = tostring(data.lapTime)
@@ -1958,8 +1958,8 @@ function Vehicle:addLapTime(data, beammp)
     ) then
         lapTypeOutput = "rxCourseBest"
         lapTimeOutput = tostring(data.lapTime)
-        MP.SendChatMessage(-1, self.owner .. " set a course best time of: " .. prettyTime(data.lapTime))
-        MP.SendNotification(-1, self.owner .. " set a course best time of: " .. prettyTime(data.lapTime), 'timer', self.owner .. tostring(os.time))
+        MP.SendChatMessage(-1, self.owner .. " set a course best time of " .. prettyTime(data.lapTime))
+        MP.SendNotification(-1, self.owner .. " set a course best time of " .. prettyTime(data.lapTime))
     end
     local playerJsonPath = playersPath .. beammp .. ".json"
     local playerData = ReadJSON(playerJsonPath)
