@@ -5,6 +5,8 @@ local trackIdentifier = "long"
 
 local prefabIdentifier = "/gameplay/missions/hirochi_raceway/timeTrial/005-longcourse/mainPrefab.prefab.json"
 
+local originalMPUILayout = jsonReadFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json")
+
 local M = {}
 
 local hotLaps_VERSION = "v0.0.3"
@@ -2000,51 +2002,40 @@ end
 
 local function rxLeaderBoard(data)
     local recievedData = jsonDecode(data)
+    local level = theLeaderBoard.levels[levelIdentifier].tracks[trackIdentifier]
     if recievedData.overallBestTime then
-        theLeaderBoard.levels[levelIdentifier].tracks[trackIdentifier].overallBestTime = recievedData.overallBestTime
-    elseif recievedData.data then
-        theLeaderBoard.levels[levelIdentifier].tracks[trackIdentifier][recievedData.model] = {
-            entries = recievedData.data.entries,
-            overallBestTime = recievedData.data.overallBestTime
-        }
-        local skip
-        local chronLength = tableLength(chronLeaders)
-        if recievedData.data.overallBestTime.owner then
-            if chronLength > 0 then
-                for k in pairs(chronLeaders) do
-                    if chronLeaders[k].owner == recievedData.data.overallBestTime.owner then
-                        if chronLeaders[k].lapTime == recievedData.data.overallBestTime.lapTime then
-                            skip = true
-                        end
-                    end
-                end
-                if not skip then
-                    table.insert(chronLeaders, recievedData.data.overallBestTime)
-                    table.sort(
-                        chronLeaders, function(a, b)
-                            if a.lapTime == b.lapTime then
-                                return a.lapTime > b.lapTime
-                            else
-                                return a.lapTime < b.lapTime
-                            end
-                        end
-                    )
-                end
-                skip = false
-            else
-                table.insert(chronLeaders, recievedData.data.overallBestTime)
-                table.sort(
-                    chronLeaders, function(a, b)
-                        if a.lapTime == b.lapTime then
-                            return a.lapTime > b.lapTime
-                        else
-                            return a.lapTime < b.lapTime
-                        end
-                    end
-                )
+        level.overallBestTime = recievedData.overallBestTime
+        return
+    end
+    if not recievedData.data then
+        return
+    end
+    level[recievedData.model] = {
+        entries = recievedData.data.entries,
+        overallBestTime = recievedData.data.overallBestTime
+    }
+    if not recievedData.data.entries then
+        return
+    end
+    for _, j in pairs(recievedData.data.entries) do
+        local duplicate
+        for _, v in pairs(chronLeaders) do
+            if v.owner == j.owner and v.model == j.model and v.lapTime == j.lapTime then
+                duplicate = true
+                break
             end
         end
+        if not duplicate then
+            table.insert(chronLeaders, j)
+        end
     end
+    table.sort(chronLeaders, function(a, b)
+        if a.lapTime == b.lapTime then
+            return a.lapTime > b.lapTime
+        else
+            return a.lapTime < b.lapTime
+        end
+    end)
 end
 
 local function rxCourseBest(time)
@@ -2700,6 +2691,34 @@ local function onExtensionLoaded()
     AddEventHandler("rxNeutral", rxNeutral)
     AddEventHandler("rxLeaderBoard", rxLeaderBoard)
     AddEventHandler("rxPrefabSync", rxPrefabSync)
+
+    local currentMPUILayout = deepcopy(originalMPUILayout)
+    local found
+    if currentMPUILayout then
+        for _, app in pairs(currentMPUILayout.apps) do
+            if app.appName == "raceCountdown" then
+                found = true
+            end
+        end
+        if not found then
+            local raceCountdown = {
+            appName = "raceCountdown",
+                placement = {
+                    bottom = "",
+                    height = "160px",
+                    left = 0,
+                    margin = "auto",
+                    position = "absolute",
+                    right = 0,
+                    top = "40%",
+                    width = "690px"
+                }
+            }
+            table.insert(currentMPUILayout.apps, raceCountdown)
+            jsonWriteFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json", currentMPUILayout, 1)
+        end
+    end
+
     gui_module.initialize(gui)
     gui.registerWindow("hotLaps", im.ImVec2(300, 500))
     gui.showWindow("hotLaps")
@@ -2707,6 +2726,7 @@ local function onExtensionLoaded()
 end
 
 local function onExtensionUnloaded()
+    jsonWriteFile("settings/ui_apps/layouts/default/multiplayer.uilayout.json", originalMPUILayout, 1)
     syncRequested = false
     log('I', "hotLaps", "HotLaps Unloaded!")
 end
